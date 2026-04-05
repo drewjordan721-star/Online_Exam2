@@ -1,176 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Survey App</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-    }
-
-    select, input[type=range] {
-      width: 100%;
-      margin: 15px 0;
-    }
-
-    .slider-label {
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .vertical-slider {
-      transform: rotate(-90deg);
-      height: 150px;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .next { background: #3b82f6; color: white; }
-    .back { background: #ccc; }
-    .submit { background: #22c55e; color: white; }
-  </style>
-</head>
-<body>
-
-<div class="card">
-  <h2 id="step"></h2>
-  <p id="question"></p>
-
-  <div id="inputArea"></div>
-
-  <div class="buttons">
-    <button class="back" onclick="prev()">Back</button>
-    <button class="next" onclick="next()" id="nextBtn">Next</button>
-  </div>
-</div>
-
-<script>
-const questions = [
-  { type: "dropdown", text: "Which of the following is not a planet?", options: ["Earth","Jupiter","Mercury","Africa"] },
-  { type: "dropdown", text: "Have you ever slept on the moon before?", options: ["Yes","No","Sometimes","I plan to soon"] },
-  { type: "dropdown", text: "Which of the following is not a day of the week?", options: ["Monday","Tuesday","Wednesday","July"] },
-
-  { type: "vertical", text: "Which of these is not a fruit?", options: ["Apple","Banana","Carrot","Orange"] },
-  { type: "vertical", text: "What color is the sky on a sunny day?", options: ["Green","Blue","Red","Black"] },
-  { type: "vertical", text: "How many legs does a normal dog have?", options: ["Two","Four","Six","Eight"] },
-
-  { type: "horizontal", text: "Which of these is not something you eat with?", options: ["Fork","Spoon","Knife","Shoe"] },
-  { type: "horizontal", text: "What do you use to hear sounds?", options: ["Eyes","Ears","Nose","Mouth"] },
-
-  { type: "dropdown", text: "Have you ever flown to the moon without a spaceship?", options: ["Yes","No","Maybe","Last week"] },
-  { type: "dropdown", text: "Which of the following is not a continent?", options: ["Africa","Asia","Europe","London"] }
-];
-
-let current = 0;
-let answers = {};
-
-function render() {
-  const q = questions[current];
-  document.getElementById("step").innerText = `Step ${current + 1} of ${questions.length}`;
-  document.getElementById("question").innerText = q.text;
-
-  const inputArea = document.getElementById("inputArea");
-  inputArea.innerHTML = "";
-
-  if (q.type === "dropdown") {
-    const select = document.createElement("select");
-    select.innerHTML = `<option disabled selected>Select option</option>`;
-    q.options.forEach(opt => {
-      const o = document.createElement("option");
-      o.value = opt;
-      o.textContent = opt;
-      select.appendChild(o);
-    });
-
-    select.onchange = () => answers[current] = select.value;
-    inputArea.appendChild(select);
-  }
-
-  if (q.type === "vertical" || q.type === "horizontal") {
-    const range = document.createElement("input");
-    range.type = "range";
-    range.min = 0;
-    range.max = q.options.length - 1;
-    range.value = answers[current] || 0;
-
-    if (q.type === "vertical") {
-      range.classList.add("vertical-slider");
-    }
-
-    const label = document.createElement("div");
-    label.className = "slider-label";
-    label.innerText = q.options[range.value];
-
-    range.oninput = () => {
-      answers[current] = range.value;
-      label.innerText = q.options[range.value];
-    };
-
-    inputArea.appendChild(range);
-    inputArea.appendChild(label);
-  }
-
-  const nextBtn = document.getElementById("nextBtn");
-  if (current === questions.length - 1) {
-    nextBtn.textContent = "Submit";
-    nextBtn.className = "submit";
-  } else {
-    nextBtn.textContent = "Next";
-    nextBtn.className = "next";
-  }
-}
-
-function next() {
-  if (current === questions.length - 1) {
-    console.log("Answers:", answers);
-    alert("Submitted! Check console.");
-    return;
-  }
-  current++;
-  render();
-}
-
-function prev() {
-  if (current > 0) {
-    current--;
-    render();
-  }
-}
-
-render();
-</script>
-
-</body>
-</html>
+‎<!DOCTYPE html><html lang="en">
+‎<head>
+‎<meta charset="UTF-8">
+‎<meta name="viewport" content="width=device-width, initial-scale=1.0">
+‎<title>Survey</title>
+‎<style>
+‎body { font-family: Arial; background:#f4f4f4; display:flex; justify-content:center; padding:20px; }
+‎.container { background:#fff; padding:20px; border-radius:10px; width:100%; max-width:500px; }
+‎button { padding:10px 15px; border:none; border-radius:5px; cursor:pointer; }
+‎.next { background:blue; color:#fff; }
+‎.back { background:gray; color:#fff; }
+‎.option { padding:10px; border:1px solid #ddd; margin:5px 0; cursor:pointer; border-radius:5px; }
+‎.option.selected { background:#007bff; color:#fff; }
+‎.slider-labels { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
+‎</style>
+‎</head>
+‎<body><div class="container">
+‎  <h3 id="step"></h3>
+‎  <p id="question"></p>  <div id="answers"></div>  <br>
+‎  <button class="back" onclick="prev()">Back</button>
+‎  <button class="next" onclick="next()">Next</button>
+‎</div><script>
+‎const questions = [
+‎{ type:"list", text:"Which of the following is not a planet?", options:["Earth","Jupiter","Mercury","Africa"]},
+‎{ type:"list", text:"Have you ever slept on the moon before?", options:["Yes","No","Sometimes","I plan to soon"]},
+‎{ type:"list", text:"Which of the following is not a day of the week?", options:["Monday","Tuesday","Wednesday","July"]},
+‎
+‎{ type:"vslider", text:"Which of these is not a fruit?", options:["Apple","Banana","Carrot","Orange"]},
+‎{ type:"vslider", text:"What color is the sky on a sunny day?", options:["Green","Blue","Red","Black"]},
+‎{ type:"vslider", text:"How many legs does a normal dog have?", options:["Two","Four","Six","Eight"]},
+‎
+‎{ type:"hslider", text:"Which of these is not something you eat with?", options:["Fork","Spoon","Knife","Shoe"]},
+‎{ type:"hslider", text:"What do you use to hear sounds?", options:["Eyes","Ears","Nose","Mouth"]},
+‎
+‎{ type:"list", text:"Have you ever flown to the moon without a spaceship?", options:["Yes","No","Maybe","Last week"]},
+‎{ type:"list", text:"Which of the following is not a continent?", options:["Africa","Asia","Europe","London"]}
+‎];
+‎
+‎let current = 0;
+‎let answers = {};
+‎
+‎function render() {
+‎  const q = questions[current];
+‎  document.getElementById("step").innerText = `Question ${current+1} of ${questions.length}`;
+‎  document.getElementById("question").innerText = q.text;
+‎
+‎  const container = document.getElementById("answers");
+‎  container.innerHTML = "";
+‎
+‎  if(q.type === "list"){
+‎    q.options.forEach((opt,i)=>{
+‎      const div = document.createElement("div");
+‎      div.className = "option" + (answers[current]===i ? " selected":"");
+‎      div.innerText = `${i+1}. ${opt}`;
+‎      div.onclick = ()=>{ answers[current]=i; render(); };
+‎      container.appendChild(div);
+‎    });
+‎  }
+‎
+‎  if(q.type === "hslider"){
+‎    const labels = document.createElement("div");
+‎    labels.className="slider-labels";
+‎    q.options.forEach(opt=>{
+‎      const span=document.createElement("span");
+‎      span.innerText=opt;
+‎      labels.appendChild(span);
+‎    });
+‎
+‎    const input = document.createElement("input");
+‎    input.type="range";
+‎    input.min=1;
+‎    input.max=q.options.length;
+‎    input.value=(answers[current]??1);
+‎    input.style.width="100%";
+‎
+‎    input.oninput = (e)=>{ answers[current]=Number(e.target.value); };
+‎
+‎    container.appendChild(labels);
+‎    container.appendChild(input);
+‎  }
+‎
+‎  if(q.type === "vslider"){
+‎    const labels = document.createElement("div");
+‎    q.options.forEach((opt,i)=>{
+‎      const div=document.createElement("div");
+‎      div.innerText=`${i+1}. ${opt}`;
+‎      labels.appendChild(div);
+‎    });
+‎
+‎    const input = document.createElement("input");
+‎    input.type="range";
+‎    input.min=1;
+‎    input.max=q.options.length;
+‎    input.value=(answers[current]??1);
+‎    input.style.transform="rotate(-90deg)";
+‎    input.style.marginTop="20px";
+‎
+‎    input.oninput = (e)=>{ answers[current]=Number(e.target.value); };
+‎
+‎    container.appendChild(labels);
+‎    container.appendChild(input);
+‎  }
+‎}
+‎
+‎function next(){ if(current<questions.length-1){ current++; render(); } else { alert("Submitted! Check console"); console.log(answers);} }
+‎function prev(){ if(current>0){ current--; render(); } }
+‎
+‎render();
+‎</script></body>
+‎</html>
