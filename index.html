@@ -1,110 +1,228 @@
-‎<!DOCTYPE html><html lang="en">
-‎<head>
-‎<meta charset="UTF-8">
-‎<meta name="viewport" content="width=device-width, initial-scale=1.0">
-‎<title>Survey</title>
-‎<style>
-‎body { font-family: Arial; background:#f4f4f4; display:flex; justify-content:center; padding:20px; }
-‎.container { background:#fff; padding:20px; border-radius:10px; width:100%; max-width:500px; }
-‎button { padding:10px 15px; border:none; border-radius:5px; cursor:pointer; }
-‎.next { background:blue; color:#fff; }
-‎.back { background:gray; color:#fff; }
-‎.option { padding:10px; border:1px solid #ddd; margin:5px 0; cursor:pointer; border-radius:5px; }
-‎.option.selected { background:#007bff; color:#fff; }
-‎.slider-labels { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
-‎</style>
-‎</head>
-‎<body><div class="container">
-‎  <h3 id="step"></h3>
-‎  <p id="question"></p>  <div id="answers"></div>  <br>
-‎  <button class="back" onclick="prev()">Back</button>
-‎  <button class="next" onclick="next()">Next</button>
-‎</div><script>
-‎const questions = [
-‎{ type:"list", text:"Which of the following is not a planet?", options:["Earth","Jupiter","Mercury","Africa"]},
-‎{ type:"list", text:"Have you ever slept on the moon before?", options:["Yes","No","Sometimes","I plan to soon"]},
-‎{ type:"list", text:"Which of the following is not a day of the week?", options:["Monday","Tuesday","Wednesday","July"]},
-‎
-‎{ type:"vslider", text:"Which of these is not a fruit?", options:["Apple","Banana","Carrot","Orange"]},
-‎{ type:"vslider", text:"What color is the sky on a sunny day?", options:["Green","Blue","Red","Black"]},
-‎{ type:"vslider", text:"How many legs does a normal dog have?", options:["Two","Four","Six","Eight"]},
-‎
-‎{ type:"hslider", text:"Which of these is not something you eat with?", options:["Fork","Spoon","Knife","Shoe"]},
-‎{ type:"hslider", text:"What do you use to hear sounds?", options:["Eyes","Ears","Nose","Mouth"]},
-‎
-‎{ type:"list", text:"Have you ever flown to the moon without a spaceship?", options:["Yes","No","Maybe","Last week"]},
-‎{ type:"list", text:"Which of the following is not a continent?", options:["Africa","Asia","Europe","London"]}
-‎];
-‎
-‎let current = 0;
-‎let answers = {};
-‎
-‎function render() {
-‎  const q = questions[current];
-‎  document.getElementById("step").innerText = `Question ${current+1} of ${questions.length}`;
-‎  document.getElementById("question").innerText = q.text;
-‎
-‎  const container = document.getElementById("answers");
-‎  container.innerHTML = "";
-‎
-‎  if(q.type === "list"){
-‎    q.options.forEach((opt,i)=>{
-‎      const div = document.createElement("div");
-‎      div.className = "option" + (answers[current]===i ? " selected":"");
-‎      div.innerText = `${i+1}. ${opt}`;
-‎      div.onclick = ()=>{ answers[current]=i; render(); };
-‎      container.appendChild(div);
-‎    });
-‎  }
-‎
-‎  if(q.type === "hslider"){
-‎    const labels = document.createElement("div");
-‎    labels.className="slider-labels";
-‎    q.options.forEach(opt=>{
-‎      const span=document.createElement("span");
-‎      span.innerText=opt;
-‎      labels.appendChild(span);
-‎    });
-‎
-‎    const input = document.createElement("input");
-‎    input.type="range";
-‎    input.min=1;
-‎    input.max=q.options.length;
-‎    input.value=(answers[current]??1);
-‎    input.style.width="100%";
-‎
-‎    input.oninput = (e)=>{ answers[current]=Number(e.target.value); };
-‎
-‎    container.appendChild(labels);
-‎    container.appendChild(input);
-‎  }
-‎
-‎  if(q.type === "vslider"){
-‎    const labels = document.createElement("div");
-‎    q.options.forEach((opt,i)=>{
-‎      const div=document.createElement("div");
-‎      div.innerText=`${i+1}. ${opt}`;
-‎      labels.appendChild(div);
-‎    });
-‎
-‎    const input = document.createElement("input");
-‎    input.type="range";
-‎    input.min=1;
-‎    input.max=q.options.length;
-‎    input.value=(answers[current]??1);
-‎    input.style.transform="rotate(-90deg)";
-‎    input.style.marginTop="20px";
-‎
-‎    input.oninput = (e)=>{ answers[current]=Number(e.target.value); };
-‎
-‎    container.appendChild(labels);
-‎    container.appendChild(input);
-‎  }
-‎}
-‎
-‎function next(){ if(current<questions.length-1){ current++; render(); } else { alert("Submitted! Check console"); console.log(answers);} }
-‎function prev(){ if(current>0){ current--; render(); } }
-‎
-‎render();
-‎</script></body>
-‎</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Multi-Page Survey</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #f59e0b;
+            --bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Wide Layout styling */
+        .survey-container {
+            width: 100%;
+            max-width: 1200px; /* Wide screen reach */
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        .step { display: none; text-align: center; animation: fadeIn 0.5s; }
+        .step.active { display: block; }
+
+        h2 { font-size: 2.5rem; margin-bottom: 30px; color: var(--primary); }
+
+        /* Option Lists (Questions 1-3 & 8-10) */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option-item {
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            text-align: left;
+        }
+
+        .option-item:hover { border-color: var(--primary); background: #eff6ff; }
+        .option-item.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Slider Styling (Tape Measure Style) */
+        .slider-container {
+            position: relative;
+            margin: 50px auto;
+            background: #f1f5f9;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .vertical-slider-box {
+            height: 400px;
+            width: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .horizontal-slider-box {
+            width: 80%;
+            max-width: 800px;
+            height: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        input[type=range] { cursor: pointer; }
+
+        .slider-labels {
+            position: absolute;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .v-labels { flex-direction: column-reverse; height: 100%; right: -120px; text-align: left; }
+        .h-labels { width: 100%; top: 60px; }
+
+        /* Navigation */
+        .nav { margin-top: 50px; display: flex; justify-content: center; gap: 20px; }
+        button {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            border: none;
+            background: var(--text);
+            color: white;
+            cursor: pointer;
+        }
+        button.next { background: var(--primary); }
+        button:disabled { opacity: 0.3; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="survey-container">
+    <div id="survey-content"></div>
+
+    <div class="nav">
+        <button id="prevBtn" onclick="move(-1)">Previous</button>
+        <button id="nextBtn" class="next" onclick="move(1)">Next</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { id: 1, q: "Which of the following is not a planet?", type: "list", options: ["Earth", "Jupiter", "Mercury", "Africa"] },
+        { id: 2, q: "Have you ever slept on the moon before?", type: "list", options: ["Yes", "No", "Sometimes", "I plan to soon"] },
+        { id: 3, q: "Which of the following is not a day of the week?", type: "list", options: ["Monday", "Tuesday", "Wednesday", "July"] },
+        { id: 4, q: "Which of these is not a fruit?", type: "v-slider", options: ["Apple", "Banana", "Carrot", "Orange"] },
+        { id: 5, q: "What color is the sky on a sunny day?", type: "v-slider", options: ["Green", "Blue", "Red", "Black"] },
+        { id: 6, q: "How many legs does a normal dog have?", type: "v-slider", options: ["Two", "Four", "Six", "Eight"] },
+        { id: 7, q: "Which of these is not something you eat with?", type: "h-slider", options: ["Fork", "Spoon", "Knife", "Shoe"] },
+        { id: 8, q: "What do you use to hear sounds?", type: "h-slider", options: ["Eyes", "Ears", "Nose", "Mouth"] },
+        { id: 9, q: "Have you ever flown to the moon without a spaceship?", type: "dropdown-list", options: ["Yes", "No", "Maybe", "Last week"] },
+        { id: 10, q: "Which of the following is not a continent?", type: "dropdown-list", options: ["Africa", "Asia", "Europe", "London"] }
+    ];
+
+    let currentStep = 0;
+    const answers = {};
+
+    function render() {
+        const container = document.getElementById('survey-content');
+        container.innerHTML = '';
+        
+        questions.forEach((q, index) => {
+            const stepDiv = document.createElement('div');
+            stepDiv.className = `step ${index === currentStep ? 'active' : ''}`;
+            
+            let html = `<h2>${q.q}</h2>`;
+
+            if (q.type === 'list' || q.type === 'dropdown-list') {
+                html += `<div class="options-list">`;
+                q.options.forEach(opt => {
+                    const isSelected = answers[q.id] === opt;
+                    html += `<div class="option-item ${isSelected ? 'selected' : ''}" onclick="selectOpt(${q.id}, '${opt}')">${opt}</div>`;
+                });
+                html += `</div>`;
+            } 
+            else if (q.type === 'v-slider') {
+                html += `
+                <div class="vertical-slider-box">
+                    <input type="range" min="0" max="3" step="1" orient="vertical" style="appearance: slider-vertical; height: 100%; width: 20px;" oninput="selectOpt(${q.id}, ${q.id}.options[this.value])">
+                    <div class="slider-labels v-labels">
+                        ${q.options.map(opt => `<div>— ${opt}</div>`).join('')}
+                    </div>
+                </div>`;
+            }
+            else if (q.type === 'h-slider') {
+                html += `
+                <div class="horizontal-slider-box">
+                    <input type="range" min="0" max="3" step="1" style="width: 100%;" oninput="selectOpt(${q.id}, ${q.id}.options[this.value])">
+                    <div class="slider-labels h-labels">
+                        ${q.options.map(opt => `<div>${opt}</div>`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            stepDiv.innerHTML = html;
+            container.appendChild(stepDiv);
+        });
+
+        document.getElementById('prevBtn').disabled = currentStep === 0;
+        document.getElementById('nextBtn').innerText = currentStep === questions.length - 1 ? 'Finish' : 'Next';
+    }
+
+    window.selectOpt = (qId, val) => {
+        // Handle the slider logic vs list logic
+        const question = questions.find(q => q.id === qId);
+        if (typeof val === 'number') {
+            answers[qId] = question.options[val];
+        } else {
+            answers[qId] = val;
+        }
+        render();
+    };
+
+    window.move = (n) => {
+        if (n === 1 && !answers[questions[currentStep].id]) {
+            alert("Please pick an answer first!");
+            return;
+        }
+        currentStep += n;
+        if (currentStep >= questions.length) {
+            alert("Results: " + JSON.stringify(answers, null, 2));
+            return;
+        }
+        render();
+    };
+
+    render();
+</script>
+
+</body>
+</html>
